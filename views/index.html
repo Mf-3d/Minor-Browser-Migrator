@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Minor-Browser Migrator</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap');
+
+      body {
+        background: #252525;
+        color: #fafafa;
+        font-family: 'Noto Sans JP', sans-serif;
+        margin-top: 0.1em;
+        font-size: 0.9em;
+      }
+
+      select, input[type="text"], input[type="button"] {
+        border: solid 1px #3d3d3d;
+        border-radius: 5px;
+        background: #252525;
+        color: #fff;
+      }
+
+      th {
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Minor-Browser Migrator</h2>
+    <table>
+      <tr>
+        <th>データを移行するブラウザ</th>
+        <td>
+          <select>
+            <option disabled>Flast (Chromium) − Coming soon...</option>
+            <option disabled>Flast Legacy − Coming soon...</option>
+            <option>Flune-Browser</option>
+            <option selected>Monot</option>
+            <option disabled>reamix − Coming soon...</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>データの移行先のブラウザ</th>
+        <td>
+          <select>
+            <option disabled>Flast (Chromium) − Coming soon...</option>
+            <option disabled>Flast Legacy − Coming soon...</option>
+            <option selected>Flune-Browser</option>
+            <option>Monot</option>
+            <option disabled>reamix − Coming soon...</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>データを移行するブラウザのデータを移行した後削除する</th>
+        <td><input type="checkbox"/></td>
+      </tr>
+      <br/>
+    </table>
+    <br/>
+    <input type="button" value="移行を開始する"/>
+  </body>
+</html>
