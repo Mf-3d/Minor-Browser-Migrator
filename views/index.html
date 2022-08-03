@@ -24,6 +24,14 @@
         text-align: left;
       }
     </style>
+    <script>
+      async function moveData() {
+        await mdm_api.moveData({
+          copy: document.getElementById('copyData').value,
+          paste: document.getElementById('pasteData').value
+        });
+      }
+    </script>
   </head>
   <body>
     <h2>Minor-Browser Migrator</h2>
@@ -31,24 +39,24 @@
       <tr>
         <th>データを移行するブラウザ</th>
         <td>
-          <select>
-            <option disabled>Flast (Chromium) − Coming soon...</option>
-            <option disabled>Flast Legacy − Coming soon...</option>
-            <option>Flune-Browser</option>
-            <option selected>Monot</option>
-            <option disabled>reamix − Coming soon...</option>
+          <select id="copyData">
+            <option disabled value="flast-chromium">Flast (Chromium) − Coming soon...</option>
+            <option disabled value="flast-legacy">Flast Legacy − Coming soon...</option>
+            <option value="flune-browser">Flune-Browser</option>
+            <option selected value="monot">Monot</option>
+            <option disabled value="reamix">reamix − Coming soon...</option>
           </select>
         </td>
       </tr>
       <tr>
         <th>データの移行先のブラウザ</th>
         <td>
-          <select>
-            <option disabled>Flast (Chromium) − Coming soon...</option>
-            <option disabled>Flast Legacy − Coming soon...</option>
-            <option selected>Flune-Browser</option>
-            <option>Monot</option>
-            <option disabled>reamix − Coming soon...</option>
+          <select id="pasteData">
+            <option disabled value="flast-chromium">Flast (Chromium) − Coming soon...</option>
+            <option disabled value="flast-legacy">Flast Legacy − Coming soon...</option>
+            <option selected value="flune-browser">Flune-Browser</option>
+            <option value="monot">Monot</option>
+            <option disabled value="reamix">reamix − Coming soon...</option>
           </select>
         </td>
       </tr>
@@ -59,6 +67,6 @@
       <br/>
     </table>
     <br/>
-    <input type="button" value="移行を開始する"/>
+    <input type="button" value="移行を開始する" onclick="moveData()"/>
   </body>
 </html>
