@@ -3,7 +3,7 @@ const electron = require('electron');
 
 /** @type { electron.BrowserWindow } */ let win;
 
-let appDataPath = (process.platform === 'darwin') ? `${require('os').homedir()}/Library/Application Support` : `${require('os').homedir()}/a`;
+let appDataPath = (process.platform === 'darwin') ? `${require('os').homedir()}/Library/Application Support` : `${require('os').homedir()}\\AppData\\Roaming`;
 console.log(appDataPath);
 function nw () {
   win = new electron.BrowserWindow({
