@@ -62,7 +62,7 @@ electron.ipcMain.handle('moveData',
 
   // --------------------------------
   // 貼り付けられるデータをコピーする
-  // （バックアップなど）
+  // （バックアップなどに使う）
   // --------------------------------
 
   let paste = {};
@@ -83,7 +83,46 @@ electron.ipcMain.handle('moveData',
     paste['%_flune_config'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'flune-browser', 'config.json'), { encoding: 'utf-8' }));
   }
 
-  
+  moveData(copy, paste);
 
   console.log(copy);
 });
+
+/** 
+ * @param {{
+ *    '%_monot_settings': any;
+ *    '%_monot_bookmarks': any;
+ *    '%_monot_history': any;
+ *    '%_flune_config': any;
+ * }} copy
+ * @param {{
+ *    '%_monot_settings': any;
+ *    '%_monot_bookmarks': any;
+ *    '%_monot_history': any;
+ *    '%_flune_config': any;
+ * }} paste
+ */
+function moveData (copy, paste) {
+  const unificationSettings = {
+    windowSize: [900, 800],
+    bookmark: [],
+    history: [],
+
+    // ブラウザー独自の項目
+    unique: null
+  }
+
+  if (copy['%_monot_settings']) {
+    let unificationCopy = unificationSettings;
+
+    unificationCopy.windowSize = [copy['%_monot_settings'].width, copy['%_monot_settings'].height];
+
+    unificationCopy.unique = {
+      monot: {
+        experiments: copy['%_monot_settings'].experiments,
+        startup: copy['%_monot_settings'].startup,
+        ui: copy['%_monot_settings'].ui
+      }
+    }
+  }
+}
