@@ -49,7 +49,7 @@ electron.ipcMain.handle('moveData',
     copy['%_monot_settings'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'monot', 'config.mncfg'), { encoding: 'utf-8' }));
 
     // ブックマークをコピーする (bookmark.mncfg)
-    copy['%_monot_bookmarks'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'monot', 'bookmark.mncfg'), { encoding: 'utf-8' }));
+    copy['%_monot_bookmarks'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'monot', 'bookmark.mndata'), { encoding: 'utf-8' }));
     
     // 履歴をコピーする (history.mndata)
     copy['%_monot_history'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'monot', 'history.mndata'), { encoding: 'utf-8' }));
@@ -72,7 +72,7 @@ electron.ipcMain.handle('moveData',
     paste['%_monot_settings'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'monot', 'config.mncfg'), { encoding: 'utf-8' }));
 
     // ブックマークをコピーする (bookmark.mncfg)
-    paste['%_monot_bookmarks'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'monot', 'bookmark.mncfg'), { encoding: 'utf-8' }));
+    paste['%_monot_bookmarks'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'monot', 'bookmark.mndata'), { encoding: 'utf-8' }));
     
     // 履歴をコピーする (history.mndata)
     paste['%_monot_history'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'monot', 'history.mndata'), { encoding: 'utf-8' }));
@@ -84,8 +84,6 @@ electron.ipcMain.handle('moveData',
   }
 
   moveData(copy, paste);
-
-  console.log(copy);
 });
 
 /** 
@@ -109,20 +107,141 @@ function moveData (copy, paste) {
     history: [],
 
     // ブラウザー独自の項目
-    unique: null
+    unique: {}
   }
 
-  if (copy['%_monot_settings']) {
-    let unificationCopy = unificationSettings;
+  let unificationCopy = {
+    windowSize: [900, 800],
+    bookmark: [],
+    history: [],
 
+    // ブラウザー独自の項目
+    unique: {}
+  }
+
+  let unificationPaste = {
+    windowSize: [900, 800],
+    bookmark: [],
+    history: [],
+
+    // ブラウザー独自の項目
+    unique: {}
+  }
+
+  // --------------------------------
+  // コピーするデータを共通の形式に変更する
+  // --------------------------------
+  if (copy['%_monot_settings']) {
     unificationCopy.windowSize = [copy['%_monot_settings'].width, copy['%_monot_settings'].height];
 
-    unificationCopy.unique = {
-      monot: {
-        experiments: copy['%_monot_settings'].experiments,
-        startup: copy['%_monot_settings'].startup,
-        ui: copy['%_monot_settings'].ui
-      }
-    }
+    unificationCopy.unique.monot = {};
+
+    unificationCopy.unique.monot.experiments = copy['%_monot_settings'].experiments;
+    unificationCopy.unique.monot.startup = copy['%_monot_settings'].startup;
+    unificationCopy.unique.monot.ui = copy['%_monot_settings'].ui;
   }
+
+  if (copy['%_monot_bookmarks']) {
+    unificationCopy.unique.monot.bookmark = [];
+
+    copy['%_monot_bookmarks'].forEach((bookmark) => {
+      unificationCopy.bookmark[unificationCopy.bookmark.length] = {
+        title: bookmark.pageTitle,
+        url: bookmark.pageUrl
+      }
+
+      unificationCopy.unique.monot.bookmark = [];
+
+      unificationCopy.unique.monot.bookmark[unificationCopy.unique.monot.bookmark.length] = bookmark;
+    });
+  }
+
+  if (copy['%_monot_history']) {
+    unificationCopy.unique.monot.history = [];
+
+    copy['%_monot_history'].forEach((history) => {
+      unificationCopy.history[unificationCopy.history.length] = {
+        title: history.pageTitle,
+        url: history.pageUrl
+      }
+
+      unificationCopy.unique.monot.history = [];
+
+      unificationCopy.unique.monot.history[unificationCopy.unique.monot.history.length] = history;
+    });
+  }
+
+  if (copy['%_flune_config']) {
+    unificationCopy.windowSize = copy['%_flune_config'].window.window_size;
+
+    unificationCopy.bookmark = copy['%_flune_config'].bookmark;
+
+    unificationCopy.history = copy['%_flune_config'].history;
+    
+    unificationCopy.unique.flune = {};
+
+    unificationCopy.unique.flune.force_twemoji = copy['%_flune_config'].settings.force_twemoji;
+    unificationCopy.unique.flune['use-home-button'] = copy['%_flune_config'].settings['use-home-button'];
+    unificationCopy.unique.flune.theme = copy['%_flune_config'].settings.theme;
+    unificationCopy.unique.flune['setting-auto-save'] = copy['%_flune_config'].settings['setting-auto-save'];
+  }
+
+  // -----------------------------------
+  // ペーストするデータを共通の形式に変更する
+  // -----------------------------------
+  if (paste['%_monot_settings']) {
+    unificationPaste.windowSize = [paste['%_monot_settings'].width, paste['%_monot_settings'].height];
+
+    unificationPaste.unique.monot = {};
+
+    unificationPaste.unique.monot.experiments = paste['%_monot_settings'].experiments;
+    unificationPaste.unique.monot.startup = paste['%_monot_settings'].startup;
+    unificationPaste.unique.monot.ui = paste['%_monot_settings'].ui;
+  }
+
+  if (paste['%_monot_bookmarks']) {
+    unificationPaste.unique.monot.bookmark = [];
+
+    paste['%_monot_bookmarks'].forEach((bookmark) => {
+      unificationPaste.bookmark[unificationPaste.bookmark.length] = {
+        title: bookmark.pageTitle,
+        url: bookmark.pageUrl
+      }
+
+      unificationPaste.unique.monot.bookmark[unificationPaste.unique.monot.bookmark.length] = bookmark;
+    });
+  }
+
+  if (paste['%_monot_history']) {
+    unificationPaste.unique.monot.history = [];
+
+    paste['%_monot_history'].forEach((history) => {
+      unificationPaste.history[unificationPaste.history.length] = {
+        title: history.pageTitle,
+        url: history.pageUrl
+      }
+
+     
+
+      unificationPaste.unique.monot.history[unificationPaste.unique.monot.history.length] = history;
+    });
+  }
+
+  if (paste['%_flune_config']) {
+    unificationPaste.windowSize = paste['%_flune_config'].window.window_size;
+
+    unificationPaste.bookmark = paste['%_flune_config'].bookmark;
+
+    unificationPaste.history = paste['%_flune_config'].history;
+    
+    unificationPaste.unique.flune = {};
+
+    unificationPaste.unique.flune.force_twemoji = paste['%_flune_config'].settings.force_twemoji;
+    unificationPaste.unique.flune['use-home-button'] = paste['%_flune_config'].settings['use-home-button'];
+    unificationPaste.unique.flune.theme = paste['%_flune_config'].settings.theme;
+    unificationPaste.unique.flune['setting-auto-save'] = paste['%_flune_config'].settings['setting-auto-save'];
+  }
+
+  console.log(unificationCopy);
+  console.log(unificationPaste);
 }
