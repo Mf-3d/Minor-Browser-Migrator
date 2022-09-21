@@ -257,6 +257,8 @@ function moveData (copy, paste, data) {
   if (data.paste === 'monot') {
     final['%_monot_settings'] = {};
 
+    final['%_monot_settings'].experiments = { "forceDark": false,"fontChange" :false,"changedfont" :"" };
+    final['%_monot_settings'].startup = false;
     final['%_monot_settings'].width = unificationCopy.windowSize[0];
     final['%_monot_settings'].height = unificationCopy.windowSize[1];
     final['%_monot_settings']['%%_minor-browser-migratorUniques_%%'] = unificationCopy.unique;
@@ -287,5 +289,20 @@ function moveData (copy, paste, data) {
 
     final['%_flune_config'].window.window_size = unificationCopy.windowSize;
     final['%_flune_config'].bookmark = unificationCopy.bookmark;
+  }
+
+  // ----------------
+  // 実際に移行する
+  // ----------------
+  if(data.paste === 'monot'){
+    // 一応バックアップ
+    fs.writeFileSync(path.join(appDataPath, 'monot', 'config_backup.mncfg'), fs.readFileSync(path.join(appDataPath, 'monot', 'config.mncfg'), { encoding: 'utf-8' }));
+    fs.writeFileSync(path.join(appDataPath, 'monot', 'bookmark_backup.mndata'), fs.readFileSync(path.join(appDataPath, 'monot', 'bookmark.mndata'), { encoding: 'utf-8' }));
+    fs.writeFileSync(path.join(appDataPath, 'monot', 'history_backup.mndata'), fs.readFileSync(path.join(appDataPath, 'monot', 'history.mndata'), { encoding: 'utf-8' }));
+
+    // 恐怖の移行作業
+    fs.writeFileSync(path.join(appDataPath, 'monot', 'config.mncfg'), JSON.stringify(final['%_monot_settings'], null, '\t'));
+    fs.writeFileSync(path.join(appDataPath, 'monot', 'bookmark.mndata'), JSON.stringify(final['%_monot_bookmarks'], null, '\t'));
+    fs.writeFileSync(path.join(appDataPath, 'monot', 'history.mndata'), JSON.stringify(final['%_monot_history'], null, '\t'));
   }
 }
