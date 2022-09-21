@@ -83,7 +83,7 @@ electron.ipcMain.handle('moveData',
     paste['%_flune_config'] = JSON.parse(fs.readFileSync(path.join(appDataPath, 'flune-browser', 'config.json'), { encoding: 'utf-8' }));
   }
 
-  moveData(copy, paste);
+  moveData(copy, paste, data);
 });
 
 /** 
@@ -100,7 +100,7 @@ electron.ipcMain.handle('moveData',
  *    '%_flune_config': any;
  * }} paste
  */
-function moveData (copy, paste) {
+function moveData (copy, paste, data) {
   const unificationSettings = {
     windowSize: [900, 800],
     bookmark: [],
@@ -176,7 +176,9 @@ function moveData (copy, paste) {
 
     unificationCopy.bookmark = copy['%_flune_config'].bookmark;
 
-    unificationCopy.history = copy['%_flune_config'].history;
+    // Fluneと他のブラウザと履歴の仕様が全然違うので後回し
+
+    // unificationCopy.history = copy['%_flune_config'].history;
     
     unificationCopy.unique.flune = {};
 
@@ -231,8 +233,6 @@ function moveData (copy, paste) {
     unificationPaste.windowSize = paste['%_flune_config'].window.window_size;
 
     unificationPaste.bookmark = paste['%_flune_config'].bookmark;
-
-    unificationPaste.history = paste['%_flune_config'].history;
     
     unificationPaste.unique.flune = {};
 
@@ -242,6 +242,50 @@ function moveData (copy, paste) {
     unificationPaste.unique.flune['setting-auto-save'] = paste['%_flune_config'].settings['setting-auto-save'];
   }
 
-  console.log(unificationCopy);
-  console.log(unificationPaste);
+  // 【メモ】
+  // unificationCopy : ペースト先の形式に変換するための中間
+  // unificationPaste: 別にいらない（デバッグ用）
+
+
+
+  // ----------------------------------------------------------
+  // コピーするデータの共通の形式にしたものをペースト先の形式に変換する
+  // ----------------------------------------------------------
+
+  let final = {};
+
+  if (data.paste === 'monot') {
+    final['%_monot_settings'] = {};
+
+    final['%_monot_settings'].width = unificationCopy.windowSize[0];
+    final['%_monot_settings'].height = unificationCopy.windowSize[1];
+    final['%_monot_settings']['%%_minor-browser-migratorUniques_%%'] = unificationCopy.unique;
+
+    final['%_monot_bookmarks'] = [];
+    unificationCopy.bookmark.forEach(bookmark => {
+      final['%_monot_bookmarks'][final['%_monot_bookmarks'].length] = { 
+        pageTitle: bookmark.title,
+        pageDescription: '',
+        pageUrl: bookmark.url,
+        pageIcon: ''
+      }
+    });
+
+    final['%_monot_history'] = [];
+    unificationCopy.history.forEach(history => {
+      final['%_monot_history'][final['%_monot_history'].length] = { 
+        pageTitle: history.title,
+        pageDescription: '',
+        pageUrl: history.url,
+        pageIcon: ''
+      }
+    });
+  }
+
+  else if (data.paste === 'flune-browser') {
+    final['%_flune_config'] = {};
+
+    final['%_flune_config'].window.window_size = unificationCopy.windowSize;
+    final['%_flune_config'].bookmark = unificationCopy.bookmark;
+  }
 }
