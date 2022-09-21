@@ -287,6 +287,8 @@ function moveData (copy, paste, data) {
   else if (data.paste === 'flune-browser') {
     final['%_flune_config'] = {};
 
+    final['%_flune_config'].window = {};
+    
     final['%_flune_config'].window.window_size = unificationCopy.windowSize;
     final['%_flune_config'].bookmark = unificationCopy.bookmark;
   }
@@ -294,7 +296,7 @@ function moveData (copy, paste, data) {
   // ----------------
   // 実際に移行する
   // ----------------
-  if(data.paste === 'monot'){
+  if(data.paste === 'monot') {
     // 一応バックアップ
     fs.writeFileSync(path.join(appDataPath, 'monot', 'config_backup.mncfg'), fs.readFileSync(path.join(appDataPath, 'monot', 'config.mncfg'), { encoding: 'utf-8' }));
     fs.writeFileSync(path.join(appDataPath, 'monot', 'bookmark_backup.mndata'), fs.readFileSync(path.join(appDataPath, 'monot', 'bookmark.mndata'), { encoding: 'utf-8' }));
@@ -304,5 +306,13 @@ function moveData (copy, paste, data) {
     fs.writeFileSync(path.join(appDataPath, 'monot', 'config.mncfg'), JSON.stringify(final['%_monot_settings'], null, '\t'));
     fs.writeFileSync(path.join(appDataPath, 'monot', 'bookmark.mndata'), JSON.stringify(final['%_monot_bookmarks'], null, '\t'));
     fs.writeFileSync(path.join(appDataPath, 'monot', 'history.mndata'), JSON.stringify(final['%_monot_history'], null, '\t'));
+  }
+
+  else if(data.paste === 'flune-browser') {
+    // 一応バックアップ
+    fs.writeFileSync(path.join(appDataPath, 'flune-browser', 'config_backup.json'), fs.readFileSync(path.join(appDataPath, 'flune-browser', 'config.json'), { encoding: 'utf-8' }));
+
+    // 恐怖の移行作業
+    fs.writeFileSync(path.join(appDataPath, 'flune-browser', 'config.json'), JSON.stringify(final['%_flune_config'], null, '\t'));
   }
 }
