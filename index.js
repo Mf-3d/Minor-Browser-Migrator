@@ -5,6 +5,11 @@ const path = require('path');
 
 /** @type { electron.BrowserWindow } */ let win;
 
+process.on('er', (reason, p) => {
+  win.webContents.send('updateStatus', `エラーが発生しました。<br/>${reason}`);
+  console.log(p, 'でエラーが発生しました。', reason);
+});
+
 let appDataPath = (process.platform === 'darwin') ? `${require('os').homedir()}/Library/Application Support` : `${require('os').homedir()}\\AppData\\Roaming`;
 console.log(appDataPath);
 function nw () {
@@ -236,6 +241,7 @@ function moveData (copy, paste, data) {
     
     unificationPaste.unique.flune = {};
 
+    
     unificationPaste.unique.flune.force_twemoji = paste['%_flune_config'].settings.force_twemoji;
     unificationPaste.unique.flune['use-home-button'] = paste['%_flune_config'].settings['use-home-button'];
     unificationPaste.unique.flune.theme = paste['%_flune_config'].settings.theme;
@@ -287,8 +293,14 @@ function moveData (copy, paste, data) {
   else if (data.paste === 'flune-browser') {
     final['%_flune_config'] = {};
 
-    final['%_flune_config'].window = {};
+    final['%_flune_config'].settings = {};
+    final['%_flune_config'].settings.force_twemoji = unificationCopy.unique.force_twemoji;
+    final['%_flune_config'].settings['use-home-button'] = unificationCopy.unique['use-home-button'];
+    final['%_flune_config'].settings.theme = unificationCopy.unique.theme;
+    final['%_flune_config'].settings['setting-auto-save'] = unificationCopy.unique['setting-auto-save'];
     
+    final['%_flune_config'].window = {};
+
     final['%_flune_config'].window.window_size = unificationCopy.windowSize;
     final['%_flune_config'].bookmark = unificationCopy.bookmark;
   }
@@ -306,6 +318,8 @@ function moveData (copy, paste, data) {
     fs.writeFileSync(path.join(appDataPath, 'monot', 'config.mncfg'), JSON.stringify(final['%_monot_settings'], null, '\t'));
     fs.writeFileSync(path.join(appDataPath, 'monot', 'bookmark.mndata'), JSON.stringify(final['%_monot_bookmarks'], null, '\t'));
     fs.writeFileSync(path.join(appDataPath, 'monot', 'history.mndata'), JSON.stringify(final['%_monot_history'], null, '\t'));
+  
+    win.webContents.send('updateStatus', '移行が完了しました。');
   }
 
   else if(data.paste === 'flune-browser') {
@@ -314,5 +328,7 @@ function moveData (copy, paste, data) {
 
     // 恐怖の移行作業
     fs.writeFileSync(path.join(appDataPath, 'flune-browser', 'config.json'), JSON.stringify(final['%_flune_config'], null, '\t'));
+  
+    win.webContents.send('updateStatus', '移行が完了しました。');
   }
 }

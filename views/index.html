@@ -35,10 +35,17 @@
           paste: document.getElementById('pasteData').value
         });
       }
+
+      window.onload = () => {
+        mbm_api.on('updateStatus', (_event, text) => {
+          document.getElementById('status').innerHTML = text;
+        });
+      }
     </script>
   </head>
   <body>
     <h2>Minor-Browser Migrator</h2>
+    <span id="status"></span>
     <table>
       <tr>
         <th>データを移行するブラウザ</th>
@@ -64,11 +71,6 @@
           </select>
         </td>
       </tr>
-      <tr>
-        <th>データを移行するブラウザのデータを移行した後削除する</th>
-        <td><input type="checkbox"/></td>
-      </tr>
-      <br/>
     </table>
     <br/>
     <input type="button" value="移行を開始する" onclick="moveData()"/>
